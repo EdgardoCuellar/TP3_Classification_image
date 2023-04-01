@@ -1,7 +1,7 @@
 import os
 
 # Set the directory path where the images are located
-directory_path = './raw_data/tagada'
+directory_path = '../raw_data/tagada'
 
 # Get a list of all files in the directory
 file_list = os.listdir(directory_path)

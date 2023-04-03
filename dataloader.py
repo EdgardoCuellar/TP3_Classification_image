@@ -8,4 +8,3 @@ batch_size = 2
 # Create the PyTorch DataLoader instances for the training and validation datasets
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
-

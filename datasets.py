@@ -47,12 +47,12 @@ val_dataset = CustomDataset(val_dir, transform=transform)
 
 
 # Visualize some images from the training dataset
-fig, axs = plt.subplots(3, 3, figsize=(8, 8))
-fig.suptitle('Sample Images from the Training Dataset')
-for i in range(3):
-    for j in range(3):
-        img, label = train_dataset[i * 3 + j]
-        axs[i, j].imshow(img.permute(1, 2, 0))
-        axs[i, j].set_title(train_dataset.class_names[label])
-        axs[i, j].axis('off')
+# fig, axs = plt.subplots(3, 3, figsize=(8, 8))
+# fig.suptitle('Sample Images from the Training Dataset')
+# for i in range(3):
+#     for j in range(3):
+#         img, label = train_dataset[i * 3 + j]
+#         axs[i, j].imshow(img.permute(1, 2, 0))
+#         axs[i, j].set_title(train_dataset.class_names[label])
+#         axs[i, j].axis('off')
 # plt.show()

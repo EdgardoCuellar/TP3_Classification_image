@@ -38,8 +38,8 @@ transform = transforms.Compose([
 ])
 
 # Define the paths to the training and validation directories
-train_dir = './data/training'
-val_dir = './data/validation'
+train_dir = './data_square/training'
+val_dir = './data_square/validation'
 
 # Create the custom datasets
 train_dataset = CustomDataset(train_dir, transform=transform)

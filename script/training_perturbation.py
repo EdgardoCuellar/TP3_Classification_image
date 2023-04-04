@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 
 # Color random
-is_validation = True
+is_validation = False
 data_type = 'training'
 if is_validation:
     data_type = 'validation'

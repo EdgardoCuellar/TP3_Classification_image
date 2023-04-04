@@ -1,2 +1,4 @@
 __pycache__
-__pycache__/datasets.cpython-310.pyc
+raw_data/animals_test
+models
+models/haribo_classifier.pth

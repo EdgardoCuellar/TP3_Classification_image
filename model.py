@@ -10,32 +10,11 @@ import multiprocessing
 import matplotlib.pyplot as plt
 import numpy as np
 
-if __name__ == '__main__':
-    multiprocessing.freeze_support()
-    # Define the model architecture
-    
-    if torch.cuda.is_available(): 
-        dev = "cuda:0" 
-        torch.cuda.empty_cache() # needed to avoid memory issues with cuda
-        print("Running on the GPU")
-    else: 
-        dev = "cpu" 
-        print("Running on the CPU")
-    device = torch.device(dev) 
-    
-    
-    model = alexnet(weights=AlexNet_Weights.DEFAULT)
-    num_ftrs = model.classifier[6].in_features
-    model.classifier[6] = nn.Linear(num_ftrs, 4)
-    
-    model.to(device)
+from my_model import MyModel
 
-    # Define the loss function and optimizer
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
+def train_model(model, criterion, optimizer, train_loader, val_loader, device, num_epochs=10):
     # Train the model
-    num_epochs = 10
     train_losses = []
     val_losses = []
     train_accs = []
@@ -51,11 +30,14 @@ if __name__ == '__main__':
         
         # Train loop
         for i, (inputs, labels) in enumerate(train_loader):
+            batch_size = inputs.size(0)
+            
             inputs, labels = inputs.to(device), labels.to(device)
             
             optimizer.zero_grad()
             
             outputs = model(inputs)
+            
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -95,11 +77,18 @@ if __name__ == '__main__':
         val_accs.append(val_correct / val_total)
         
         print(f"Epoch {epoch + 1}/{num_epochs} Train loss: {train_losses[-1]:.4f} Train acc: {train_accs[-1]:.4f} Val loss: {val_losses[-1]:.4f} Val acc: {val_accs[-1]:.4f}")
-        
-        
+    
+    # # Save the model
+    torch.save(model.state_dict(), './models/haribo_classifier.pth')
+    
+    return y_true, y_pred
+    # display_confusion_matrix(y_true, y_pred)
+    
+          
+def display_confusion_matrix(y_true, y_pred):
     # Display the confusion matrix
     cm = confusion_matrix(y_true, y_pred)
-    classes = train_loader.dataset.class_names
+    classes = train_loader.dataset.class_to_idx
     cmap = plt.cm.Blues
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title('Confusion matrix')
@@ -110,8 +99,39 @@ if __name__ == '__main__':
     plt.xlabel('Predicted label')
     plt.ylabel('True label')
     plt.show()
-    
-    # # Save the model
-    torch.save(model.state_dict(), './models/haribo_classifier.pth')
 
  
+if __name__ == '__main__':
+    torch.cuda.empty_cache()
+    
+    pretrained = True
+    
+    multiprocessing.freeze_support()
+    # Define the model architecture
+    
+    if torch.cuda.is_available(): 
+        dev = "cuda:0" 
+        torch.cuda.empty_cache() # needed to avoid memory issues with cuda
+        print("Running on the GPU")
+    else: 
+        dev = "cpu" 
+        print("Running on the CPU")
+    device = torch.device(dev) 
+    
+    if pretrained:
+        model = alexnet(weights=AlexNet_Weights.DEFAULT)
+        num_ftrs = model.classifier[6].in_features
+        model.classifier[6] = nn.Linear(num_ftrs, 4)
+    else:
+        model = MyModel()
+        
+    
+    # Define the loss function and optimizer
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+    model.to(device)
+    
+    y_true, y_pred = train_model(model, criterion, optimizer, train_loader, val_loader, device, num_epochs=10)
+    display_confusion_matrix(y_true, y_pred)
+    

@@ -2,7 +2,6 @@ import torch
 from torch.utils.data import DataLoader
 from datasets import train_dataset, val_dataset
 
-
 # Create the PyTorch DataLoader instances for the training and validation datasets
-train_loader = DataLoader(train_dataset, batch_size=9, shuffle=True, num_workers=4)
-val_loader = DataLoader(val_dataset, batch_size=3, shuffle=False, num_workers=4)
+train_loader = DataLoader(train_dataset, batch_size=9, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=3, shuffle=False)

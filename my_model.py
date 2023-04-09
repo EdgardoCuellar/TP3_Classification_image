@@ -1,38 +1,21 @@
-import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader
-from torchvision.models import alexnet
-from torchvision.models.alexnet import AlexNet_Weights
-from sklearn.metrics import confusion_matrix
-from dataloader import train_loader, val_loader
-import multiprocessing
-import matplotlib.pyplot as plt
-import numpy as np
+import torch.nn.functional as F
+import torch
 
-if __name__ == '__main__':
-    multiprocessing.freeze_support()
-    # Define the model architecture
-    
-    if torch.cuda.is_available(): 
-        dev = "cuda:0" 
-        torch.cuda.empty_cache() # needed to avoid memory issues with cuda
-        print("Running on the GPU")
-    else: 
-        dev = "cpu" 
-        print("Running on the CPU")
-    device = torch.device(dev) 
-    
-    
-    # model = alexnet(weights=AlexNet_Weights.DEFAULT)
-    # num_ftrs = model.classifier[6].in_features
-    # model.classifier[6] = nn.Linear(num_ftrs, 4)
-    
-    model.to(device)
-
-
-    
-    # # Save the model
-    torch.save(model.state_dict(), './models/haribo_classifier.pth')
-
- 
+# Define the neural network architecture
+class MyModel(nn.Module):
+    def __init__(self):
+        super(MyModel, self).__init__()
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.fc1 = nn.Linear(64 * 56 * 56, 128)
+        self.fc2 = nn.Linear(128, 4)
+        
+    def forward(self, x):
+        x = self.pool(nn.functional.relu(self.conv1(x)))
+        x = self.pool(nn.functional.relu(self.conv2(x)))
+        x = torch.flatten(x, 1)
+        x = nn.functional.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x

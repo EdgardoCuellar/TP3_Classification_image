@@ -30,8 +30,6 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, device, n
         
         # Train loop
         for i, (inputs, labels) in enumerate(train_loader):
-            batch_size = inputs.size(0)
-            
             inputs, labels = inputs.to(device), labels.to(device)
             
             optimizer.zero_grad()
@@ -122,13 +120,14 @@ if __name__ == '__main__':
         model = alexnet(weights=AlexNet_Weights.DEFAULT)
         num_ftrs = model.classifier[6].in_features
         model.classifier[6] = nn.Linear(num_ftrs, 4)
+        optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
     else:
         model = MyModel()
+        optimizer = optim.Adam(model.parameters(), lr=0.001)
         
     
     # Define the loss function and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     model.to(device)
     

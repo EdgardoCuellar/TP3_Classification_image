@@ -14,13 +14,12 @@ def predict_image(model, img_path):
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
     ])
 
     input_tensor = preprocess(input_image)
     input_batch = input_tensor.unsqueeze(0) # create a mini-batch as expected by the model
 
-    # move the input and model to GPU for speed if available
     if torch.cuda.is_available():
         input_batch = input_batch.to('cuda')
         model.to('cuda')
@@ -28,28 +27,29 @@ def predict_image(model, img_path):
     with torch.no_grad():
         output = model(input_batch)
 
-    # The output has unnormalized scores. To get probabilities, you can run a softmax on it.
     return torch.nn.functional.softmax(output[0], dim=0)
 
+# Get the top 5 predictions and return the best one
 def results(probabilities, categories):
-    _, top5_catid = torch.topk(probabilities, 5)
+    top5_prob, top5_catid = torch.topk(probabilities, 5)
+    for i in range(top5_prob.size(0)):
+        print(categories[top5_catid[i]], top5_prob[i].item())
     return categories[top5_catid[0]]
     
     
 if __name__ == "__main__":
-    # get list of images paths from a directory
     imgs_path = "./raw_data/animals_test"
     sub_dirs = os.listdir(imgs_path)
     sub_dirs.append("others")
 
-    model = alexnet(weights=AlexNet_Weights.DEFAULT)
+    model = alexnet(weights=AlexNet_Weights.DEFAULT) # get the pretrained model
     model.eval()
     
     # Read the categories
     with open("./raw_data/imagenet_classes.txt", "r") as f:
         categories = [s.strip() for s in f.readlines()]
     
-        # initialize confusion matrix
+    # initialize confusion matrix, to display later
     num_classes = len(sub_dirs)
     confusion_matrix = np.zeros((num_classes, num_classes))
 
@@ -67,18 +67,3 @@ if __name__ == "__main__":
             j = sub_dirs.index(subdir)
             k = sub_dirs.index(predicted_category)
             confusion_matrix[j, k] += 1
-
-    # plot the confusion matrix
-    fig, ax = plt.subplots()
-    im = ax.imshow(confusion_matrix, cmap=plt.cm.Blues)
-    ax.set_xticks(np.arange(num_classes))
-    ax.set_yticks(np.arange(num_classes))
-    ax.set_xticklabels(sub_dirs)
-    ax.set_yticklabels(sub_dirs)
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
-    for i in range(num_classes):
-        for j in range(num_classes):
-            text = ax.text(j, i, int(confusion_matrix[i, j]), ha="center", va="center", color="w")
-    ax.set_title("Confusion Matrix")
-    fig.tight_layout()
-    plt.show()

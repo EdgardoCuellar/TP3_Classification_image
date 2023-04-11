@@ -76,11 +76,12 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, device, n
         
         print(f"Epoch {epoch + 1}/{num_epochs} Train loss: {train_losses[-1]:.4f} Train acc: {train_accs[-1]:.4f} Val loss: {val_losses[-1]:.4f} Val acc: {val_accs[-1]:.4f}")
     
-    # # Save the model
-    torch.save(model.state_dict(), './models/haribo_classifier.pth')
-    
-    return y_true, y_pred
+    # Save the model
+    # torch.save(model.state_dict(), './models/haribo_classifier.pth')
     # display_confusion_matrix(y_true, y_pred)
+    
+    return y_true, y_pred, train_accs, val_accs
+    
     
           
 def display_confusion_matrix(y_true, y_pred):
@@ -98,11 +99,20 @@ def display_confusion_matrix(y_true, y_pred):
     plt.ylabel('True label')
     plt.show()
 
- 
+def display_accuracy(train_accs, val_accs):
+    epochs = range(1, len(train_accs) + 1)
+    plt.plot(epochs, train_accs, 'b', label='Training accuracy')
+    plt.plot(epochs, val_accs, 'g', label='Validation accuracy')
+    plt.title('Training and validation accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.show()
+
 if __name__ == '__main__':
     torch.cuda.empty_cache()
     
-    pretrained = True
+    pretrained = False
     
     multiprocessing.freeze_support()
     # Define the model architecture
@@ -131,6 +141,7 @@ if __name__ == '__main__':
 
     model.to(device)
     
-    y_true, y_pred = train_model(model, criterion, optimizer, train_loader, val_loader, device, num_epochs=10)
+    y_true, y_pred, train, val = train_model(model, criterion, optimizer, train_loader, val_loader, device, num_epochs=10)
     display_confusion_matrix(y_true, y_pred)
+    display_accuracy(train, val)
     

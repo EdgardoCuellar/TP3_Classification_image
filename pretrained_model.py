@@ -30,10 +30,12 @@ def predict_image(model, img_path):
     return torch.nn.functional.softmax(output[0], dim=0)
 
 # Get the top 5 predictions and return the best one
-def results(probabilities, categories):
+def results(probabilities, categories, subdir, count_display):
     top5_prob, top5_catid = torch.topk(probabilities, 5)
-    for i in range(top5_prob.size(0)):
-        print(categories[top5_catid[i]], top5_prob[i].item())
+    if count_display < 2:
+        print("Class:", subdir)
+        for i in range(3):
+            print(categories[top5_catid[i]], top5_prob[i].item())
     return categories[top5_catid[0]]
     
     
@@ -58,10 +60,13 @@ if __name__ == "__main__":
             continue
         sub_imgs_path = os.path.join(imgs_path, subdir)
         img_files = os.listdir(sub_imgs_path)
+        count_display = 0
+        print("****************")
         for img_file in img_files:
             img_path = os.path.join(sub_imgs_path, img_file)
             probabilities = predict_image(model, img_path)
-            predicted_category = results(probabilities, categories)
+            predicted_category = results(probabilities, categories, subdir, count_display)
+            count_display += 1
             if predicted_category not in sub_dirs:
                 predicted_category = "others" 
             j = sub_dirs.index(subdir)
